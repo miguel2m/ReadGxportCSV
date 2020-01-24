@@ -21,3 +21,12 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# NetBeans specific
+ReadGxportCsvDB/nbproject/private/
+ReadGxportCsvDB/build/
+ReadGxportCsvDB/nbbuild/
+ReadGxportCsvDB/dist/
+ReadGxportCsvDB/nbdist/
+ReadGxportCsvDB/nbactions.xml
+ReadGxportCsvDB/nb-configuration.xml
