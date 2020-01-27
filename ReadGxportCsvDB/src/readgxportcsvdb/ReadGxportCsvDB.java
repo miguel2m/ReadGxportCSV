@@ -6,6 +6,7 @@
 package readgxportcsvdb;
 
 import controller.ReadAdjnodeCsv;
+import controller.ReadIprtCsv;
 import java.io.IOException;
 import java.util.ArrayList;
 import static java.util.Comparator.comparing;
@@ -14,6 +15,7 @@ import java.util.TreeSet;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
 import model.AdjNode;
+import model.Iprt;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -36,6 +38,10 @@ public class ReadGxportCsvDB {
         ReadGxportCsvDB._db_dir = _db_dir;
     }
     /**
+     * PROGRMAMA PARA LEER LA BASE DE DATOS CSV
+     * Parametros rnc = nombre de RNC
+     * n= nodos de la rnc (true or false) si se desea conocer los nodeb de la rnc
+     * iprt (true or false) si se desea conocer la vrf, srn,sn de las rnc
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -46,6 +52,10 @@ public class ReadGxportCsvDB {
         Boolean showVersion = false;
         String _rnc = null;
         boolean inputNodes =false;
+        boolean iprtSrn=false;
+        boolean iprtSn=false;
+        boolean port=false;
+        boolean iprtVRF=false;
          try {
             options.addOption( "v", "version", false, "display version" );
             options.addOption(Option.builder("rnc")
@@ -54,6 +64,10 @@ public class ReadGxportCsvDB {
                     .hasArg()
                     .argName( "RNC" ).build());
             options.addOption( "n", "nodes", false, "See RNC nodeB" );
+            options.addOption( "iprtSrn", "iprtSrn", false, "See RNC IPRT.csv SRN" );
+            options.addOption( "iprtSn", "iprtSrn", false, "See RNC IPRT.csv SN" );
+            options.addOption( "port", "iprtSrn", false, "See RNC IPRT.csv PORT" );
+            options.addOption( "iprtVRF", "iprtSrn", false, "See RNC IPRT.csv VRF" );
             options.addOption( "h", "help", false, "show help" );
             options.addOption( Option.builder("db")
                     .longOpt( "input-db-directory" )
@@ -72,6 +86,22 @@ public class ReadGxportCsvDB {
             }
             if(cmd.hasOption('n')){
                 inputNodes = true;
+                
+            }
+            if(cmd.hasOption("iprtSrn")){
+                iprtSrn = true;
+                
+            }
+            if(cmd.hasOption("iprtSn")){
+                iprtSn = true;
+                
+            }
+            if(cmd.hasOption("port")){
+                port = true;
+                
+            }
+            if(cmd.hasOption("iprtVRF")){
+                iprtVRF = true;
                 
             }
             if(cmd.hasOption("rnc")){
@@ -111,39 +141,111 @@ public class ReadGxportCsvDB {
                      formatter.printHelp( "java -jar readgxportcsvdb.jar -h", header, options, footer );
                      System.exit(0);
             }
-            if(!inputNodes){
-                try{
-                    List<AdjNode> list = ReadAdjnodeCsv.getAdjRNC(_rnc).stream()
-                                                    .collect(
-                                                         collectingAndThen(
-                                                                 toCollection(() -> 
-                                                                         new TreeSet<>(comparing(AdjNode::getFilename)))
-                                                                 ,ArrayList::new)
-                                                    );
-                    list.forEach((t) -> {
-                        String [] words =t.getFilename().split("_");
-                        System.out.println(words[1]);
+           try {
+          
+                //Conocer las rnc cargadas en la base de datos
+
+                List<AdjNode> list = ReadAdjnodeCsv.getAdjRNC(_rnc).stream()
+                        .collect(
+                                collectingAndThen(
+                                        toCollection(()
+                                                -> new TreeSet<>(comparing(AdjNode::getFilename))),
+                                         ArrayList::new)
+                        );
+                list.forEach((t) -> {
+                    String[] words = t.getFilename().split("_");
+                    System.out.println(words[1]);
+                });
+                
+            
+            
+            if(inputNodes){
+                
+                    //Coonocer los NOdeb de la RNC
+
+                    List<AdjNode> listAdj = ReadAdjnodeCsv.getAdjNodeRnc(_rnc).stream()
+                            .collect(
+                                    collectingAndThen(
+                                            toCollection(()
+                                                    -> new TreeSet<>(comparing(AdjNode::getName))),
+                                            ArrayList::new)
+                            );
+                    listAdj.forEach((t) -> {
+                        if (t.getName().startsWith("U")) {
+                            System.out.println(t.getName() + " - " + t.getTranst());
+                        }
                     });
-                }catch(IOException e){
-                    System.out.println(""+e);
-                }
-            }else{
-                 try{
-                    List<AdjNode> list = ReadAdjnodeCsv.getAdjNodeRnc(_rnc).stream()
-                                                    .collect(
-                                                         collectingAndThen(
-                                                                 toCollection(() -> 
-                                                                         new TreeSet<>(comparing(AdjNode::getName)))
-                                                                 ,ArrayList::new)
-                                                    );
-                    list.forEach((t) -> {
-                        if(t.getName().startsWith("U"))
-                        System.out.println(t.getName() +" - "+ t.getTranst());
+
+                
+            }    
+
+                
+            
+            
+            //CONOCER EL SRN IPRT DE LA RNC
+            if(iprtSrn){        
+                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+                            .collect(
+                                    collectingAndThen(
+                                            toCollection(()
+                                                    -> new TreeSet<>(comparing(Iprt::getSrn))),
+                                            ArrayList::new)
+                            );;
+                    listIprt.forEach((t) -> {
+                        
+                            System.out.println(t.getSrn());
+                        
                     });
-                }catch(IOException e){
-                    System.out.println(""+e);
-                }
             }
+            //CONOCER EL SN IPRT DE LA RNC
+            if(iprtSn){        
+                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+                            .collect(
+                                    collectingAndThen(
+                                            toCollection(()
+                                                    -> new TreeSet<>(comparing(Iprt::getSn))),
+                                            ArrayList::new)
+                            );;
+                    listIprt.forEach((t) -> {
+                        
+                            System.out.println(t.getSn());
+                        
+                    });
+            }
+            //CONOCER EL PORT IPRT DE LA RNC
+            if(port){        
+                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+                            .collect(
+                                    collectingAndThen(
+                                            toCollection(()
+                                                    -> new TreeSet<>(comparing(Iprt::getNextpn))),
+                                            ArrayList::new)
+                            );;
+                    listIprt.forEach((t) -> {
+                        
+                            System.out.println(t.getNextpn());
+                        
+                    });
+            }
+            //CONOCER EL VRF IPRT DE LA RNC
+            if(iprtVRF){        
+                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+                            .collect(
+                                    collectingAndThen(
+                                            toCollection(()
+                                                    -> new TreeSet<>(comparing(Iprt::getDstip))),
+                                            ArrayList::new)
+                            );;
+                    listIprt.forEach((t) -> {
+                        
+                            System.out.println(t.getDstip());
+                        
+                    });
+            }
+        } catch (IOException e) {
+            System.out.println("" + e);
+        }
+            
     }
     
 }
