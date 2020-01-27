@@ -142,9 +142,9 @@ public class ReadGxportCsvDB {
                      System.exit(0);
             }
            try {
-          
+            
+            if(!inputNodes && !iprtSrn && !iprtSn && !port && !iprtVRF){
                 //Conocer las rnc cargadas en la base de datos
-
                 List<AdjNode> list = ReadAdjnodeCsv.getAdjRNC(_rnc).stream()
                         .collect(
                                 collectingAndThen(
@@ -157,7 +157,7 @@ public class ReadGxportCsvDB {
                     System.out.println(words[1]);
                 });
                 
-            
+            }
             
             if(inputNodes){
                 
@@ -172,14 +172,14 @@ public class ReadGxportCsvDB {
                             );
                     listAdj.forEach((t) -> {
                         if (t.getName().startsWith("U")) {
-                            System.out.println(t.getName() + " - " + t.getTranst());
+                            System.out.println(t.getName() + "_" + t.getTranst());
                         }
                     });
 
                 
             }    
 
-                
+           
             
             
             //CONOCER EL SRN IPRT DE LA RNC
