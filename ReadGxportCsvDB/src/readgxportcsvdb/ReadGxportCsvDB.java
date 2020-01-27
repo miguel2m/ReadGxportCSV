@@ -172,7 +172,7 @@ public class ReadGxportCsvDB {
                             );
                     listAdj.forEach((t) -> {
                         if (t.getName().startsWith("U")) {
-                            System.out.println(t.getName() + "_" + t.getTranst());
+                            System.out.println(t.getName() + "-" + t.getTranst());
                         }
                     });
 
