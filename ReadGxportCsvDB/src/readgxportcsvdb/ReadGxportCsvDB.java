@@ -233,7 +233,7 @@ public class ReadGxportCsvDB {
                             System.out.println(t.getSrn());
                         
                     });
-                    System.out.println("ENTRo");
+                    
             }
             //CONOCER EL SN IPRT DEL SRN de la RNC
             if(iprtSn){
