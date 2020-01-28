@@ -6,16 +6,21 @@
 package readgxportcsvdb;
 
 import controller.ReadAdjnodeCsv;
+import controller.ReadIpPathCsv;
 import controller.ReadIprtCsv;
+import controller.ReadNodeBIpCsv;
 import java.io.IOException;
 import java.util.ArrayList;
 import static java.util.Comparator.comparing;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
 import model.AdjNode;
+import model.IpPath;
 import model.Iprt;
+import model.NodeBIp;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -207,11 +212,31 @@ public class ReadGxportCsvDB {
                                                     -> new TreeSet<>(comparing(AdjNode::getName))),
                                             ArrayList::new)
                             );
-                    listAdj.forEach((t) -> {
-                        if (t.getName().startsWith("U")) {
-                            System.out.println(t.getName() + "-" + t.getTranst());
+                    Iterator it = listAdj.iterator();
+                    while (it.hasNext()){
+                        AdjNode adjNode = (AdjNode) it.next();
+                        if (adjNode.getName().startsWith("U")) {
+                            
+                            List<NodeBIp> nodeBip = ReadNodeBIpCsv.getNodeBDstip(_rnc, adjNode.getNodeBid());
+                            
+                            if(!nodeBip.isEmpty()){
+                                String[] nodeBSplip= nodeBip.get(0).getNBTRANTP().split("_");
+                                System.out.println(adjNode.getName()+"-"+nodeBSplip[0]);
+                                
+                                //nodeBip.forEach(System.out::println);
+                            }/*else{
+                                System.out.println(adjNode.getName() + "-" + adjNode.getTranst());
+                            }*/
+                                
                         }
-                    });
+                    }
+                    /*listAdj.forEach((t) -> {
+                        if (t.getName().startsWith("U")) {
+                            //System.out.println(t.getName() + "-" + t.getTranst());
+                            //Para saber si el nodo es ATM
+                            List<NodeBIp> nodeBip = ReadNodeBIpCsv.getNodeBDstip(_rnc, t.getAni());
+                        }
+                    });*/
 
                 
             }    
@@ -271,16 +296,17 @@ public class ReadGxportCsvDB {
             }
             //CONOCER EL VRF IPRT DE LA RNC
             if(iprtVRF){        
-                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+               
+                    List<IpPath> listIprt = ReadIpPathCsv.getIpPathNode(_rnc).stream()
                             .collect(
                                     collectingAndThen(
                                             toCollection(()
-                                                    -> new TreeSet<>(comparing(Iprt::getDstip))),
+                                                    -> new TreeSet<>(comparing(IpPath::getIPADDR))),
                                             ArrayList::new)
                             );;
                     listIprt.forEach((t) -> {
                         
-                            System.out.println(t.getDstip());
+                            System.out.println(t.getIPADDR());
                         
                     });
             }

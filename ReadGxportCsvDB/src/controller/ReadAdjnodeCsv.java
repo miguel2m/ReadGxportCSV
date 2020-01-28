@@ -26,7 +26,12 @@ import readgxportcsvdb.ReadGxportCsvDB;
  * @author Miguelangel
  */
 public class ReadAdjnodeCsv {
-    
+    /**
+     * METODO QUE RETORNA LAS RNC CARGADAS
+     * @param _rnc
+     * @return
+     * @throws IOException 
+     */
     public static List<AdjNode> getAdjRNC(String _rnc)throws IOException{
         
         Path myPath = Paths.get(ReadGxportCsvDB.getDb_dir()+"/ADJNODE.csv");
@@ -56,7 +61,12 @@ public class ReadAdjnodeCsv {
         return aniNodes;
         
     }
-    
+    /**
+     * METODO QUE RETORNA LOS NODOS DE LAS RNC
+     * @param _rnc
+     * @return
+     * @throws IOException 
+     */
     public static List<AdjNode> getAdjNodeRnc(String _rnc)throws IOException{
         
         Path myPath = Paths.get(ReadGxportCsvDB.getDb_dir()+"/ADJNODE.csv");

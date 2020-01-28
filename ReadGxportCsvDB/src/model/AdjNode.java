@@ -22,7 +22,10 @@ public class AdjNode {
     private String name;
     @CsvBindByName (column = "TRANST")
     private String transt;
-
+    @PreAssignmentProcessor(processor = ConvertEmptyOrBlankStringsToDefault.class, paramString = "-1")
+    @CsvBindByName (column = "NODEBID")
+    private int nodeBid;
+    
     public String getFilename() {
         return filename;
     }
@@ -55,11 +58,22 @@ public class AdjNode {
         this.transt = transt;
     }
 
-    @Override
-    public String toString() {
-        return "AdjNode{" + "filename=" + filename + ", ani=" + ani + ", name=" + name + ", transt=" + transt + '}';
+    public int getNodeBid() {
+        return nodeBid;
     }
 
+    public void setNodeBid(int nodeBid) {
+        this.nodeBid = nodeBid;
+    }
+
+   
+
+    @Override
+    public String toString() {
+        return "AdjNode{" + "filename=" + filename + ", ani=" + ani + ", name=" + name + ", transt=" + transt + ", nodeBid=" + nodeBid + '}';
+    }
+
+    
     
     
     
