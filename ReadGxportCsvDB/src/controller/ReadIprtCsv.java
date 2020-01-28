@@ -30,7 +30,6 @@ public class ReadIprtCsv {
      * @param rnc
      * @return IPRT DEL NODEB
      * @throws IOException
-     * @throws CsvConstraintViolationException 
      */
     public static List<Iprt> getIprtNode(String rnc)
             throws IOException{
@@ -57,7 +56,86 @@ public class ReadIprtCsv {
             
             iprtNodes= csvToBean.parse();
             
-         
+            
+            
+        }
+        return iprtNodes;
+        
+    }
+    
+    /**
+     * EN CASO DE QUE EL NETWORK RNC NO SE ENCUENTRE EN LA IPRT DEL NODO
+     * @param _rnc
+     * @return IPRT DEL NODEB
+     * @throws IOException
+     */
+    public static List<Iprt> getIprtSN(String _rnc, short _srn)
+            throws IOException{
+        
+        Path myPath = Paths.get(ReadGxportCsvDB.getDb_dir()+"/IPRT.csv");
+        List <Iprt> iprtNodes;
+        try (BufferedReader br = Files.newBufferedReader(myPath,
+                StandardCharsets.UTF_8)) {
+
+            HeaderColumnNameMappingStrategy<Iprt> strategy
+                    = new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(Iprt.class);
+            BeanVerifier beanVerifier = (BeanVerifier) (Object t) -> {
+                Iprt node  = (Iprt)t;
+                return (node.getFilename().contains(_rnc) &&
+                        node.getSrn() == _srn); //To change body of generated lambdas, choose Tools | Templates.
+            };
+            
+            CsvToBean csvToBean = new CsvToBeanBuilder(br)
+                    .withType(Iprt.class)
+                    .withMappingStrategy(strategy)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withVerifier(beanVerifier)
+                    .build();
+            
+            iprtNodes= csvToBean.parse();
+            
+
+            
+        }
+        return iprtNodes;
+        
+    }
+    
+    /**
+     * BUSCA EL NEXTHOP POR SN,SRN Y PUERTO
+     * @param _rnc
+     * @param _srn
+     * @param _sn
+     * @return IRP (NEXTHOP)
+     * @throws IOException 
+     */
+    public static List<Iprt> getIprtPortNexthop(String _rnc,short _srn,short _sn)throws IOException{
+        
+        Path myPath = Paths.get(ReadGxportCsvDB.getDb_dir()+"/IPRT.csv");
+        List <Iprt> iprtNodes;
+        try (BufferedReader br = Files.newBufferedReader(myPath,
+                StandardCharsets.UTF_8)) {
+
+            HeaderColumnNameMappingStrategy<Iprt> strategy
+                    = new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(Iprt.class);
+            BeanVerifier beanVerifier = (BeanVerifier) (Object t) -> {
+                Iprt node  = (Iprt)t;
+                return (node.getFilename().contains(_rnc) &&
+                        node.getSrn() == _srn &&
+                        node.getSn() == _sn ); //To change body of generated lambdas, choose Tools | Templates.
+            };
+            
+            CsvToBean csvToBean = new CsvToBeanBuilder(br)
+                    .withType(Iprt.class)
+                    .withMappingStrategy(strategy)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withVerifier(beanVerifier)
+                    .build();
+            
+            iprtNodes= csvToBean.parse();
+
             
         }
         return iprtNodes;

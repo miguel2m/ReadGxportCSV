@@ -54,8 +54,12 @@ public class ReadGxportCsvDB {
         boolean inputNodes =false;
         boolean iprtSrn=false;
         boolean iprtSn=false;
-        boolean port=false;
+        boolean iprtPort=false;
         boolean iprtVRF=false;
+        
+        short _srn=-1;
+        short _sn=-1;
+        //short _port=-1;
          try {
             options.addOption( "v", "version", false, "display version" );
             options.addOption(Option.builder("rnc")
@@ -63,11 +67,26 @@ public class ReadGxportCsvDB {
                     .desc( "(RNC) to create GOU Script")
                     .hasArg()
                     .argName( "RNC" ).build());
+            options.addOption(Option.builder("srn")
+                    .longOpt( "srn" )
+                    .desc( "(RNC) SRN")
+                    .hasArg()
+                    .argName( "SRN" ).build());
+            options.addOption(Option.builder("sn")
+                    .longOpt( "sn" )
+                    .desc( "(RNC) sn")
+                    .hasArg()
+                    .argName( "SN" ).build());
+            /*options.addOption(Option.builder("port")
+                    .longOpt( "port" )
+                    .desc( "(RNC) port")
+                    .hasArg()
+                    .argName( "PORT" ).build());*/
             options.addOption( "n", "nodes", false, "See RNC nodeB" );
             options.addOption( "iprtSrn", "iprtSrn", false, "See RNC IPRT.csv SRN" );
-            options.addOption( "iprtSn", "iprtSrn", false, "See RNC IPRT.csv SN" );
-            options.addOption( "port", "iprtSrn", false, "See RNC IPRT.csv PORT" );
-            options.addOption( "iprtVRF", "iprtSrn", false, "See RNC IPRT.csv VRF" );
+            options.addOption( "iprtSn", "iprtSn", false, "See RNC IPRT.csv SN" );
+            options.addOption( "iprtPort", "iprtPort", false, "See RNC IPRT.csv PORT" );
+            options.addOption( "iprtVRF", "iprtVRF", false, "See RNC IPRT.csv VRF" );
             options.addOption( "h", "help", false, "show help" );
             options.addOption( Option.builder("db")
                     .longOpt( "input-db-directory" )
@@ -96,8 +115,8 @@ public class ReadGxportCsvDB {
                 iprtSn = true;
                 
             }
-            if(cmd.hasOption("port")){
-                port = true;
+            if(cmd.hasOption("iprtPort")){
+                iprtPort = true;
                 
             }
             if(cmd.hasOption("iprtVRF")){
@@ -110,6 +129,24 @@ public class ReadGxportCsvDB {
               
                 
             }
+            if(cmd.hasOption("srn")){
+                
+              _srn = Short.parseShort(cmd.getOptionValue("srn").toUpperCase());
+              
+                
+            }
+            if(cmd.hasOption("sn")){
+                
+              _sn = Short.parseShort(cmd.getOptionValue("sn").toUpperCase());
+              
+                
+            }
+            /*if(cmd.hasOption("port")){
+                
+              _port = Short.parseShort(cmd.getOptionValue("port").toUpperCase());
+              
+                
+            }*/
             if(cmd.hasOption("db")){
                
               _db_dir= cmd.getOptionValue("db");
@@ -143,7 +180,7 @@ public class ReadGxportCsvDB {
             }
            try {
             
-            if(!inputNodes && !iprtSrn && !iprtSn && !port && !iprtVRF){
+            if(!inputNodes && !iprtSrn && !iprtSn && !iprtPort && !iprtVRF){
                 //Conocer las rnc cargadas en la base de datos
                 List<AdjNode> list = ReadAdjnodeCsv.getAdjRNC(_rnc).stream()
                         .collect(
@@ -184,37 +221,41 @@ public class ReadGxportCsvDB {
             
             //CONOCER EL SRN IPRT DE LA RNC
             if(iprtSrn){        
-                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+                    List<Iprt> _iprtSrn = ReadIprtCsv.getIprtNode(_rnc).stream()
                             .collect(
                                     collectingAndThen(
                                             toCollection(()
                                                     -> new TreeSet<>(comparing(Iprt::getSrn))),
                                             ArrayList::new)
                             );;
-                    listIprt.forEach((t) -> {
+                    _iprtSrn.forEach((t) -> {
                         
                             System.out.println(t.getSrn());
                         
                     });
+                    System.out.println("ENTRo");
             }
-            //CONOCER EL SN IPRT DE LA RNC
-            if(iprtSn){        
-                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+            //CONOCER EL SN IPRT DEL SRN de la RNC
+            if(iprtSn){
+                if(_srn != -1){
+                    List<Iprt> _iprtSn = ReadIprtCsv.getIprtSN(_rnc,_srn).stream()
                             .collect(
                                     collectingAndThen(
                                             toCollection(()
                                                     -> new TreeSet<>(comparing(Iprt::getSn))),
                                             ArrayList::new)
-                            );;
-                    listIprt.forEach((t) -> {
+                            );
+                    _iprtSn.forEach((t) -> {
                         
                             System.out.println(t.getSn());
                         
                     });
+                }
             }
-            //CONOCER EL PORT IPRT DE LA RNC
-            if(port){        
-                    List<Iprt> listIprt = ReadIprtCsv.getIprtNode(_rnc).stream()
+            //CONOCER EL PORT IPRT DEL SN-SRN DE LA RNC
+            if(iprtPort){
+                if(_srn != -1 &&_sn!= -1){
+                    List<Iprt> listIprt = ReadIprtCsv.getIprtPortNexthop(_rnc,_srn,_sn).stream()
                             .collect(
                                     collectingAndThen(
                                             toCollection(()
@@ -226,6 +267,7 @@ public class ReadGxportCsvDB {
                             System.out.println(t.getNextpn());
                         
                     });
+                }
             }
             //CONOCER EL VRF IPRT DE LA RNC
             if(iprtVRF){        
