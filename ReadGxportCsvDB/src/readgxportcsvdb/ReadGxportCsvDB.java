@@ -220,7 +220,7 @@ public class ReadGxportCsvDB {
                             List<NodeBIp> nodeBip = ReadNodeBIpCsv.getNodeBDstip(_rnc, adjNode.getNodeBid());
                             
                             if(!nodeBip.isEmpty()){
-                                String[] nodeBSplip= nodeBip.get(0).getNBTRANTP().split("_");
+                                String[] nodeBSplip= nodeBip.get(0).getNBTRANTP().split("TRANS");
                                 System.out.println(adjNode.getName()+"-"+nodeBSplip[0]);
                                 
                                 //nodeBip.forEach(System.out::println);
